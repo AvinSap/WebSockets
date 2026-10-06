@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <input id="msg" placeholder="Type a message" />
+  <button id="send">Send</button>
+  <ul id="log"></ul>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+    const input = document.getElementById('msg');
+
+    // Adds a line of text to the list on screen
+    function addLine(text) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      document.getElementById('log').appendChild(li);
+    }
+
+    // Server sent a message, so show it
+    ws.onmessage = (e) => addLine(e.data);
+
+    // Connection closed (server stopped, network dropped)
+    ws.onclose = () => addLine('Disconnected from server');
+
+    // Something went wrong with the connection
+    ws.onerror = () => addLine('Connection error');
+
+    // Sends what's typed, if it isn't empty
+    function sendMessage() {
+      if (input.value.trim() === '') return;
+      ws.send(input.value);
+      input.value = '';
+    }
+
+    // Send on button click
+    document.getElementById('send').onclick = sendMessage;
+
+    // Also send when Enter is pressed
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') sendMessage();
+    };
+  </script>
+</body>
+</html>
